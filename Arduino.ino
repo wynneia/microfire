@@ -26,6 +26,15 @@ void setup() {
   Serial.println("Arduino Uno is ready!");
 }
 
+void beepBuzzer(int times, int duration) {
+  for (int i = 0; i < times; i++) {
+    digitalWrite(BUZZER, HIGH);
+    delay(duration);
+    digitalWrite(BUZZER, LOW);
+    delay(duration);
+  }
+}
+
 void loop() {
   int flameValue = digitalRead(FLAME_SENSOR);
   int smokeValue = analogRead(SMOKE_SENSOR);
@@ -59,26 +68,24 @@ void loop() {
       if (!pumpState) {
         pumpState = true;
         digitalWrite(WATER_PUMP, HIGH);
-        digitalWrite(BUZZER, HIGH);
         fireDetectedTime = millis();
-        Serial.println("Fire detected! Pump and buzzer activated.");
+        Serial.println("Fire detected! Pump activated.");
+        
+        beepBuzzer(5, 100);
       }
     } else {
       if (millis() - fireDetectedTime > 5000) {
         if (pumpState) {
           pumpState = false;
           digitalWrite(WATER_PUMP, LOW);
-          digitalWrite(BUZZER, LOW);
-          Serial.println("No fire detected for 5 seconds. Pump and buzzer turned off.");
+          Serial.println("No fire detected for 5 seconds. Pump turned off.");
         }
       }
     }
 
     if (smokeValue > 300) {
-      digitalWrite(BUZZER, HIGH);
-      Serial.println("High smoke levels detected! Buzzer activated.");
-    } else if (smokeValue < 300) {
-      digitalWrite(BUZZER, LOW);
+      beepBuzzer(5, 100); // Beep 5 times in a second for smoke detection
+      Serial.println("High smoke levels detected!");
     }
   }
 
