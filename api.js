@@ -25,10 +25,15 @@ const User = mongoose.model('User', userSchema);
 const sensorDataSchema = new mongoose.Schema({
   flameValue: Number,
   smokeValue: Number,
-  pumpStatus: Boolean,
   timestamp: { type: Date, default: Date.now }
 });
 const SensorData = mongoose.model('SensorData', sensorDataSchema);
+
+const pumpStatusSchema = new mongoose.Schema({
+  status: { type: Boolean, required: true },
+  timestamp: { type: Date, default: Date.now }
+});
+const PumpStatus = mongoose.model('PumpStatus', pumpStatusSchema);
 
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
@@ -91,24 +96,6 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
-app.get('/api/sensor-data/latest', authenticateToken, async (req, res) => {
-  try {
-    const latestData = await SensorData.findOne().sort({ timestamp: -1 });
-    res.json(latestData);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-app.get('/api/sensor-data/history', authenticateToken, async (req, res) => {
-  try {
-    const history = await SensorData.find().sort({ timestamp: -1 }).limit(100);
-    res.json(history);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
 app.post('/api/sensor-data', authenticateToken, async (req, res) => {
   try {
     const sensorData = new SensorData(req.body);
@@ -119,11 +106,20 @@ app.post('/api/sensor-data', authenticateToken, async (req, res) => {
   }
 });
 
-app.get('/api/pump/status', authenticateToken, async (req, res) => {
+app.get('/api/sensor-data/latest', authenticateToken, async (req, res) => {
   try {
     const latestData = await SensorData.findOne().sort({ timestamp: -1 });
-    if (latestData) {
-      res.json({ pumpStatus: latestData.pumpStatus });
+    res.json(latestData);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/api/pump/status', authenticateToken, async (req, res) => {
+  try {
+    const latestPumpStatus = await PumpStatus.findOne().sort({ timestamp: -1 });
+    if (latestPumpStatus) {
+      res.json({ pumpStatus: latestPumpStatus.status });
     } else {
       res.status(404).json({ message: 'Pump status not found' });
     }
@@ -135,11 +131,12 @@ app.get('/api/pump/status', authenticateToken, async (req, res) => {
 app.post('/api/pump/control', authenticateToken, async (req, res) => {
   try {
     const { status } = req.body;
-    const sensorData = await SensorData.findOne().sort({ timestamp: -1 });
-    if (sensorData) {
-      sensorData.pumpStatus = status;
-      await sensorData.save();
-    }
+    
+    const pumpStatusEntry = new PumpStatus({
+      status
+    });
+
+    await pumpStatusEntry.save();
     res.json({ success: true, pumpStatus: status });
   } catch (error) {
     res.status(500).json({ error: error.message });

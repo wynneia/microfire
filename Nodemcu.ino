@@ -7,8 +7,9 @@ const char* password = "janice69";
 
 const char* apiUrl = "http://mikro.a2s.ltd/api/sensor-data";
 const char* pumpStatusUrl = "http://mikro.a2s.ltd/api/pump/status";
+const char* pumpControlUrl = "http://mikro.a2s.ltd/api/pump/control";
 
-const String bearerToken = "token";
+const String bearerToken = "your_bearer_token";
 
 #define ARDUINO_RX D2
 #define ARDUINO_TX D1
@@ -23,9 +24,9 @@ unsigned long lastArduinoReadTime = 0;
 unsigned long lastWebPostTime = 0;
 unsigned long lastPumpCheckTime = 0;
 
-const unsigned long arduinoReadInterval = 1;
-const unsigned long webPostInterval = 3000;
-const unsigned long pumpCheckInterval = 3000;
+const unsigned long arduinoReadInterval = 1000; // 1 second
+const unsigned long webPostInterval = 3000; // 3 seconds
+const unsigned long pumpCheckInterval = 5000; // 5 seconds
 
 void setup() {
   Serial.begin(9600);
@@ -107,6 +108,7 @@ void fetchPumpStatus() {
 
     http.begin(client, pumpStatusUrl);
     http.addHeader("Authorization", "Bearer " + bearerToken);
+
     int httpResponseCode = http.GET();
 
     if (httpResponseCode > 0) {
