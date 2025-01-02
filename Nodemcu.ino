@@ -8,6 +8,8 @@ const char* password = "janice69";
 const char* apiUrl = "http://mikro.a2s.ltd/api/sensor-data";
 const char* pumpStatusUrl = "http://mikro.a2s.ltd/api/pump/status";
 
+const String bearerToken = "token";
+
 #define ARDUINO_RX D2
 #define ARDUINO_TX D1
 
@@ -78,6 +80,7 @@ void sendSensorData(int flameValue, int smokeValue) {
 
     http.begin(client, apiUrl);
     http.addHeader("Content-Type", "application/json");
+    http.addHeader("Authorization", "Bearer " + bearerToken);
 
     String payload = String("{\"flameValue\":") + flameValue + 
                      ",\"smokeValue\":" + smokeValue + "}";
@@ -103,7 +106,7 @@ void fetchPumpStatus() {
     WiFiClient client;
 
     http.begin(client, pumpStatusUrl);
-
+    http.addHeader("Authorization", "Bearer " + bearerToken);
     int httpResponseCode = http.GET();
 
     if (httpResponseCode > 0) {
