@@ -24,7 +24,7 @@ pip install pyserial
 
 | Column | Description |
 |--------|-------------|
-| Smoke_Level | Timestamp |
+| Smoke_Level | Smoke Level Data |
 | Timestamp | YYYY-MM-DD HH:MM:SS |
 
 ## Usage
