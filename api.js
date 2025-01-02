@@ -149,7 +149,7 @@ app.get('/api/alerts', authenticateToken, async (req, res) => {
     const alerts = [];
 
     if (latestData) {
-      if (latestData.flameValue < 500) {
+      if (latestData.flameValue < 1) {
         alerts.push({ type: 'fire', message: 'Fire detected!' });
       }
       if (latestData.smokeValue > 300) {
